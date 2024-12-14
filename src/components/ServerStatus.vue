@@ -1,6 +1,6 @@
 <template>
 <Terminal :close="close">
-    <TerminalHeader :title="title" icon="./src/assets/icon.png" />
+    <TerminalHeader :title="title" icon="/SS14.Status/icon.png" />
     <TerminalBody>
         <CommandLine v-model:value="address" placeholder="ss14://example.com" v-bind:enter-function="request_server"><label class="prompt">address:</label></CommandLine>
 
