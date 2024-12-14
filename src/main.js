@@ -6,5 +6,5 @@ import App from './App.vue'
 
 
 const app = createApp(App)
-app.use(VueCookies, { expires: '7d'})
+app.use(VueCookies, { expires: Infinity})
 app.mount('#app')
