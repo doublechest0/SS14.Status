@@ -111,7 +111,7 @@ export default {
             return this.serverStatus.tags.map(el => `[${el}]`)
         },
         title() {
-            return this.serverStatus == `` || this.serverInfo == '' ? `Space Station 14` : this.serverStatus.name + ` - ` + this.serverStatus.players + ` / ` + this.serverStatus.soft_max_players
+            return this.serverStatus.name == undefined ? `Space Station 14` : this.serverStatus.name + ` - ` + this.serverStatus.players + ` / ` + this.serverStatus.soft_max_players
         }
     },
     methods: {
@@ -122,14 +122,19 @@ export default {
             if (this.address == '')
                 return
 
-            axios.get(this.address.replace(`ss14s`, `https`).replace(`ss14`, `http`) + `/status`).then(res => {
-                this.serverStatus = res.data;
-                this.serverError = res.status == 200 ? "" : res.status
-            })
-            axios.get(this.address.replace(`ss14s`, `https`).replace(`ss14`, `http`) + `/info`).then(res => {
-                this.serverInfo = res.data;
-                this.serverError = res.status == 200 ? "" : res.status
-            })
+            if(!this.address.startsWith(`ss14://`) && !this.address.startsWith(`ss14s://`))
+            {
+                this.serverError = `Error: Doesn't start with "ss14://" or "ss14s://"`
+                return
+            }
+                
+
+            this.serverStatus = ``
+            this.serverInfo = ``
+            this.serverError = ``
+
+            axios.get(this.address.replace(`ss14s`, `https`).replace(`ss14`, `http`) + `/status`).then(res => this.serverStatus = res.data).catch(err => this.serverError = err)
+            axios.get(this.address.replace(`ss14s`, `https`).replace(`ss14`, `http`) + `/info`).then(res => this.serverInfo = res.data).catch(err => this.serverError = err)
         }
     }
 }
