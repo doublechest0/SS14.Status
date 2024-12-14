@@ -2,11 +2,14 @@
 
 <div class="main">
 
-<ServerStatus class="terminal" v-for="(server, index) in servers" :server="server" :close="rem_server"/>
+<ServerStatus class="terminal" v-for="(server, index) in servers" :key="server" :server="server" :close="rem_server.bind($event, index)" ref="status"/>
 
 <div class="container">
   <div class="vertical-center">
     <button class="button_plus" @click="add_server()">+</button>
+    <button class="button_plus" style="width: 50px;" @click="save()">Save</button>
+    <button class="button_plus" style="width: 50px;" @click="load_cookies()">Load</button>
+    <button class="button_plus" style="width: 50px;" @click="clear()">Clear</button>
   </div>
 </div>
 
@@ -32,19 +35,29 @@ export default {
     //   }
     // },
     mounted() {
-      this.servers = this.$cookies.get("servers") ?? []
+      this.load_cookies()
     },
     methods: {
+        clear() {
+          this.servers = []
+        },
+        load_cookies() {
+          this.servers = this.$cookies.get("servers") ?? []
+        },
         add_server() {
           this.servers.push(``)
-          this.save()
         },
-        rem_server(index) {
-          this.servers.splice(index, 1)
-          this.save()
+        rem_server(event, index) {
+          if (this.servers.includes(``))
+            this.reload()
+          this.servers.splice(event, 1)
+        },
+        reload() {
+          this.servers = this.$refs['status'].map((el) => el.address)
         },
         save() {
-          this.$cookies.set("servers", this.servers)
+          const servers = this.$refs['status'].map((el) => el.address)
+          this.$cookies.set("servers", servers)
         }
       }
 }
@@ -68,8 +81,12 @@ export default {
 }
 
 .button_plus {
+  backdrop-filter: blur(8px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  
   align-content: center;
   margin-top: 10px;
+  margin-right: 10px;
   width: 35px;
   height: 35px;
   background: #202425;
