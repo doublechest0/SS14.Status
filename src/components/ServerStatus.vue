@@ -73,6 +73,7 @@
                     </details>
                 </div>
             </details>
+            <a :href="serverStats" v-if="serverStats != ``">statistics</a> <b v-bind:class="serverPing <= 60 ? `success` : serverPing > 120 ? `error` : `alert`">{{ ping }}</b>
         </div>
         <span v-else-if="serverError != ''" class="error">{{ serverError }}</span>
 
@@ -96,7 +97,9 @@ export default {
             address: this.$props.server,
             serverStatus: "",
             serverInfo: "",
-            serverError: ""
+            serverError: "",
+            serverStats: "",
+            serverPing: "0"
         }
     },
     props: ["server", "close"],
@@ -110,6 +113,9 @@ export default {
         tags() {
             return this.serverStatus.tags.map(el => `[${el}]`)
         },
+        ping() {
+            return `${this.serverPing}ms`
+        },
         title() {
             return this.serverStatus.name == undefined ? `Space Station 14` : this.serverStatus.name + ` - ` + this.serverStatus.players + ` / ` + this.serverStatus.soft_max_players
         }
@@ -118,16 +124,38 @@ export default {
         copy_to_clipboard(text) {
             navigator.clipboard.writeText(text);
         },
+        async get_ping() {
+            const start = Date.now()
+            await axios.get(this.address.replace(`ss14s`, `https`).replace(`ss14`, `http`) + `/status`)
+            const finish = Date.now()
+
+            this.serverPing = (finish - start)
+        },
+        async search_stats() {
+            axios.get(`https://ss14.madeline.sh/hub`, {responseType: 'document'}).then(res => {
+                var aTags = res.data.getElementsByTagName("a");
+                var searchText = this.serverStatus.name;
+                var found = ``;
+
+                for (var i = 0; i < aTags.length; i++) {
+                if (aTags[i].textContent == searchText) {
+                    found = aTags[i];
+                    break;
+                }
+                }
+
+                if (found != ``)
+                    this.serverStats = `https://ss14.madeline.sh${found.getAttribute("href")}`
+            })
+        },
         request_server() {
             if (this.address == '')
                 return
 
-            if(!this.address.startsWith(`ss14://`) && !this.address.startsWith(`ss14s://`))
-            {
+            if (!this.address.startsWith(`ss14://`) && !this.address.startsWith(`ss14s://`)) {
                 this.serverError = `Error: Doesn't start with "ss14://" or "ss14s://"`
                 return
             }
-                
 
             this.serverStatus = ``
             this.serverInfo = ``
@@ -135,6 +163,9 @@ export default {
 
             axios.get(this.address.replace(`ss14s`, `https`).replace(`ss14`, `http`) + `/status`).then(res => this.serverStatus = res.data).catch(err => this.serverError = err)
             axios.get(this.address.replace(`ss14s`, `https`).replace(`ss14`, `http`) + `/info`).then(res => this.serverInfo = res.data).catch(err => this.serverError = err)
+
+            this.get_ping()
+            this.search_stats()
         }
     }
 }
@@ -178,6 +209,16 @@ export default {
     color: rgba(255, 255, 255, 0.5);
     margin-right: 10px;
     margin-left: 10px;
+}
+
+.success {
+    color: #76bd81;
+    margin-right: 10px;
+}
+
+.alert {
+    color: #bdbc76;
+    margin-right: 10px;
 }
 
 .error {
