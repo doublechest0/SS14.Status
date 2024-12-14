@@ -2,7 +2,7 @@
 <div class="card">
     <div class="terminal">
       <div class="buttons">
-            <button class="delete" @click="close">
+            <button class="delete" @click="close($event, index)">
                 X
             </button>
         </div>
