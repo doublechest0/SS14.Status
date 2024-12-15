@@ -91,8 +91,6 @@ import axios from 'axios';
 export default {
     mounted() {
         this.request_server()
-        this.get_ping()
-        setTimeout(() => this.search_stats(), 2000)
     },
     data() {
         return {
@@ -101,7 +99,7 @@ export default {
             serverInfo: "",
             serverError: "",
             serverStats: "",
-            serverPing: "0"
+            serverPing: "999",
         }
     },
     props: ["server", "close", "stats"],
@@ -171,6 +169,8 @@ export default {
 
             axios.get(this.url + `/status`).then(res => this.serverStatus = res.data).catch(err => this.serverError = err)
             axios.get(this.url + `/info`).then(res => this.serverInfo = res.data).catch(err => this.serverError = err)
+            this.get_ping()
+            setTimeout(() => this.search_stats(), 2000)
         }
     }
 }
