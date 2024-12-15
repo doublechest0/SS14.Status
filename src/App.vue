@@ -2,7 +2,7 @@
 
 <div class="main">
 
-<ServerStatus class="terminal" v-for="(server, index) in servers" :key="server" :server="server" :close="rem_server.bind($event, index)" ref="status"/>
+<ServerStatus class="terminal" v-for="(server, index) in servers" :key="server" :server="server" :close="rem_server.bind($event, index)" :stats="statsPage" ref="status"/>
 
 <div class="container">
   <div class="vertical-center">
@@ -19,11 +19,13 @@
 
 <script>
 import ServerStatus from './components/ServerStatus.vue'
+import axios from 'axios';
 
 export default {
     data() {
       return {
-        servers: []
+        servers: [],
+        statsPage: Document
       }
     },
     components: {
@@ -36,6 +38,7 @@ export default {
     // },
     mounted() {
       this.load_cookies()
+      axios.get(`https://ss14.madeline.sh/hub`, {responseType: 'document'}).then(res => this.statsPage = res.data)
     },
     methods: {
         clear() {

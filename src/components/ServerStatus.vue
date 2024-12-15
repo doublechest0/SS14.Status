@@ -91,6 +91,8 @@ import axios from 'axios';
 export default {
     mounted() {
         this.request_server()
+        this.get_ping()
+        setTimeout(() => this.search_stats(), 1000)
     },
     data() {
         return {
@@ -102,7 +104,7 @@ export default {
             serverPing: "0"
         }
     },
-    props: ["server", "close"],
+    props: ["server", "close", "stats"],
     components: {
         Terminal,
         TerminalBody,
@@ -114,7 +116,11 @@ export default {
             return this.serverStatus.tags.map(el => `[${el}]`)
         },
         ping() {
-            return `${this.serverPing}ms`
+            return `${this.serverPing}ms (because of free proxy)`
+        },
+        url() {
+            // CORS proxy & HTTP to HTTPS proxy
+            return `https://thingproxy.freeboard.io/fetch/` + this.address.replace(`ss14s`, `https`).replace(`ss14`, `http`)
         },
         title() {
             return this.serverStatus.name == undefined ? `Space Station 14` : this.serverStatus.name + ` - ` + this.serverStatus.players + ` / ` + this.serverStatus.soft_max_players
@@ -126,27 +132,25 @@ export default {
         },
         async get_ping() {
             const start = Date.now()
-            await axios.get(this.address.replace(`ss14s`, `https`).replace(`ss14`, `http`) + `/status`)
+            await axios.get(this.url + `/status`)
             const finish = Date.now()
 
             this.serverPing = (finish - start)
         },
         async search_stats() {
-            axios.get(`https://ss14.madeline.sh/hub`, {responseType: 'document'}).then(res => {
-                var aTags = res.data.getElementsByTagName("a");
-                var searchText = this.serverStatus.name;
-                var found = ``;
+            var aTags = this.stats.getElementsByTagName("a");
+            var searchText = this.serverStatus.name;
+            var found = ``;
 
-                for (var i = 0; i < aTags.length; i++) {
+            for (var i = 0; i < aTags.length; i++) {
                 if (aTags[i].textContent == searchText) {
                     found = aTags[i];
                     break;
                 }
-                }
+            }
 
-                if (found != ``)
-                    this.serverStats = `https://ss14.madeline.sh${found.getAttribute("href")}`
-            })
+            if (found != ``)
+                this.serverStats = `https://ss14.madeline.sh${found.getAttribute("href")}`
         },
         request_server() {
             if (this.address == '')
@@ -161,11 +165,8 @@ export default {
             this.serverInfo = ``
             this.serverError = ``
 
-            axios.get(this.address.replace(`ss14s`, `https`).replace(`ss14`, `http`) + `/status`).then(res => this.serverStatus = res.data).catch(err => this.serverError = err)
-            axios.get(this.address.replace(`ss14s`, `https`).replace(`ss14`, `http`) + `/info`).then(res => this.serverInfo = res.data).catch(err => this.serverError = err)
-
-            this.get_ping()
-            this.search_stats()
+            axios.get(this.url + `/status`).then(res => this.serverStatus = res.data).catch(err => this.serverError = err)
+            axios.get(this.url + `/info`).then(res => this.serverInfo = res.data).catch(err => this.serverError = err)
         }
     }
 }
