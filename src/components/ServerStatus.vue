@@ -5,18 +5,19 @@
         <CommandLine v-model:value="address" placeholder="ss14://example.com" v-bind:enter-function="request_server"><label class="prompt">address:</label></CommandLine>
 
         <div v-if="serverError == '' & serverInfo != '' & serverStatus !=''">
+            <p class="subfield small">{{ `#${serverStatus.round_id} / ${serverStatus.map ?? `No map`} / ${round_start_time} - ${round_level}` }}</p>
             <details>
-                <summary class="prompt">status:</summary>
+                <summary class="prompt"><img width="12" height="12" src="/SS14.Status/copy.svg" @click="copy_to_clipboard(JSON.stringify(serverStatus))"> status:</summary>
                 <div class="subfield">
 
                     <details>
                         <summary><b>round:</b></summary>
                         <div class="subfield">
-                            <p>id: #{{serverStatus.round_id}}</p>
-                            <p>run_level: {{serverStatus.run_level == 0 ? `PreRoundLobby` : serverStatus.run_level == 1? `InRound` : `PostRound`}}</p>
-                            <p>preset: {{serverStatus.preset}}</p>
-                            <p>map: {{serverStatus.map}}</p>
-                            <p>round_start_time: {{Math.round(((Date.now() - Date.parse(this.serverStatus.round_start_time)) / 1000) / 60)}} minutes ago</p>
+                            <p><img width="12" height="12" src="/SS14.Status/copy.svg" @click="copy_to_clipboard(`#${serverStatus.round_id}`)"> id: #{{serverStatus.round_id}}</p>
+                            <p><img width="12" height="12" src="/SS14.Status/copy.svg" @click="copy_to_clipboard(round_level)"> run_level: {{ round_level }}</p>
+                            <p><img width="12" height="12" src="/SS14.Status/copy.svg" @click="copy_to_clipboard(serverStatus.preset)"> preset: {{serverStatus.preset}}</p>
+                            <p><img width="12" height="12" src="/SS14.Status/copy.svg" @click="copy_to_clipboard(serverStatus.map)"> map: {{serverStatus.map}}</p>
+                            <p><img width="12" height="12" src="/SS14.Status/copy.svg"  @click="copy_to_clipboard(round_start_time)"> round_start_time: {{ round_start_time }} </p>
                         </div>
                     </details>
 
@@ -29,44 +30,47 @@
                     </details>
 
                     <details>
-                        <summary><b>tags:</b></summary>
+                        <summary><img width="12" height="12" src="/SS14.Status/copy.svg" @click="copy_to_clipboard(JSON.stringify(serverStatus.tags))"> <b>tags:</b></summary>
                         <span v-for="tag in tags" class="subfield">{{ tag }}</span>
                     </details>
                 </div>
             </details>
 
             <details>
-                <summary class="prompt">info:</summary>
+                <summary class="prompt"><img width="12" height="12" src="/SS14.Status/copy.svg" @click="copy_to_clipboard(JSON.stringify(serverInfo))"> info:</summary>
                 <div class="subfield">
-                    <a v-bind:href="serverInfo.connect_address">connect_address</a>
+                    <p v-if="!serverInfo.build.acz"><img width="12" height="12" src="/SS14.Status/copy.svg" @click="copy_to_clipboard(serverInfo.connect_address)"> connect_address: {{ serverInfo.connect_address }}</p>
                     <details>
-                        <summary><b>auth:</b></summary>
+                        <summary><img width="12" height="12" src="/SS14.Status/copy.svg" @click="copy_to_clipboard(JSON.stringify(serverInfo.auth))"> <b>auth:</b></summary>
                         <div class="subfield">
-                            <p>mode: {{ serverInfo.auth.mode }}</p>
-                            <p>public_key: <i @mouseup="copy_to_clipboard(serverInfo.auth.public_key)">copy</i></p>
+                            <p><img width="12" height="12" src="/SS14.Status/copy.svg" @click="copy_to_clipboard(serverInfo.auth.mode)"> mode: {{ serverInfo.auth.mode }}</p>
+                            <p><img width="12" height="12" src="/SS14.Status/copy.svg" @click="copy_to_clipboard(serverInfo.auth.public_key)"> public_key: {{ serverInfo.auth.public_key }}</p>
                         </div>
                     </details>
                     <details>
-                        <summary><b>build:</b></summary>
+                        <summary><img width="12" height="12" src="/SS14.Status/copy.svg" @click="copy_to_clipboard(JSON.stringify(serverInfo.build))"> <b>build:</b></summary>
                         <div class="subfield">
-                            <p>engine_version: {{ serverInfo.build.engine_version }}</p>
-                            <p>fork_id: {{ serverInfo.build.fork_id }}</p>
-                            <p>version: {{ serverInfo.build.version }}</p>
-                            <a v-bind:href="serverInfo.build.download_url	">download_url</a>
-                            <p>hash: <i @mouseup="copy_to_clipboard(serverInfo.build.hash)">copy</i></p>
-                            <p>{{ serverInfo.build.acz ? `Automatic Client Zip detected` : `Automatic Client Zip undetected` }}</p>
-                            <a v-bind:href="serverInfo.build.manifest_url">manifest</a> | <a v-bind:href="serverInfo.build.manifest_hash">manifest_hash</a> | <a v-bind:href="serverInfo.build.manifest_download_url">download</a>
+                            <p><img width="12" height="12" src="/SS14.Status/copy.svg" @click="copy_to_clipboard(serverInfo.build.engine_version)"> engine_version: {{ serverInfo.build.engine_version }}</p>
+                            <p><img width="12" height="12" src="/SS14.Status/copy.svg" @click="copy_to_clipboard(serverInfo.build.fork_id)"> fork_id: {{ serverInfo.build.fork_id }}</p>
+                            <p><img width="12" height="12" src="/SS14.Status/copy.svg" @click="copy_to_clipboard(serverInfo.build.version)"> version: {{ serverInfo.build.version }}</p>
+                            <p><img width="12" height="12" src="/SS14.Status/copy.svg" @click="copy_to_clipboard(serverInfo.build.hash)"> hash: {{ serverInfo.build.hash }}</p>
+                            <a v-bind:href="serverInfo.build.download_url" v-if="!serverInfo.build.acz">download_build</a>
+                            <p><img width="12" height="12" src="/SS14.Status/copy.svg" @click="copy_to_clipboard(serverInfo.build.manifest_hash)"> manifest_hash: {{ serverInfo.build.manifest_hash }}</p>
+                            <a v-bind:href="serverInfo.build.manifest_url" v-if="!serverInfo.build.acz">show_manifest</a> <a v-bind:href="serverInfo.build.manifest_download_url" v-if="!serverInfo.build.acz">download_manifest</a>
+                            <br v-if="!serverInfo.build.acz">
+                            <br>
+                            <b v-bind:class="serverInfo.build.acz ? `alert` : ``">{{ serverInfo.build.acz ? `Automatic Client Zip detected` : `Automatic Client Zip undetected` }}</b>
                         </div>
                     </details>
                     <details>
-                        <summary><b>desc:</b></summary>
+                        <summary><img width="12" height="12" src="/SS14.Status/copy.svg" @click="copy_to_clipboard(serverInfo.desc)"> <b>desc:</b></summary>
                         <div class="server-desc">
                             <textarea readonly="true" width="400" height="100" type="submit" v-bind:value="serverInfo.desc"></textarea>
                         </div>
 
                     </details>
                     <details>
-                        <summary><b>links:</b></summary>
+                        <summary><img width="12" height="12" src="/SS14.Status/copy.svg" @click="copy_to_clipboard(JSON.stringify(serverInfo.links))"> <b>links:</b></summary>
                         <div class="subfield" v-for="link in serverInfo.links">
                             <a v-bind:href="link.url">{{link.name}}</a>
                         </div>
@@ -110,11 +114,17 @@ export default {
         CommandLine
     },
     computed: {
+        round_start_time() {
+            return `${Math.round(((Date.now() - Date.parse(this.serverStatus.round_start_time)) / 1000) / 60)} minutes ago`
+        },
+        round_level() {
+            return this.serverStatus.run_level == 0 ? `PreRoundLobby` : this.serverStatus.run_level == 1? `InRound` : `PostRound`
+        },
         tags() {
             return this.serverStatus.tags.map(el => `[${el}]`)
         },
         ping() {
-            return `${this.serverPing}ms (because of free proxy)`
+            return `${this.serverPing}ms`
         },
         cdn() {
             
@@ -193,6 +203,20 @@ export default {
     }
 }
 
+img {
+    cursor: pointer;
+}
+
+a:visited {
+  color: #006adc;
+  background-color: transparent;
+  text-decoration: none;
+}
+
+.small {
+    font-size: 14px;
+}
+
 .prompt {
     color: #ffffff;
     margin-right: 10px;
@@ -208,9 +232,11 @@ export default {
 .prompt {
     color: #ffffff;
     margin-right: 10px;
+    cursor:default;
 }
 
 .subfield {
+    cursor:default;
     color: rgba(255, 255, 255, 0.5);
     margin-right: 10px;
     margin-left: 10px;
@@ -224,6 +250,10 @@ export default {
 .alert {
     color: #bdbc76;
     margin-right: 10px;
+}
+
+.copy {
+    justify-content: center;
 }
 
 .error {
