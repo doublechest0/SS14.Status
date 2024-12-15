@@ -7,6 +7,7 @@ import vueDevTools from 'vite-plugin-vue-devtools'
 // https://vite.dev/config/
 export default defineConfig({
   base: `/SS14.Status/`,
+  publicDir: 'SS14.Status',
   plugins: [
     vue(),
     vueDevTools(),
