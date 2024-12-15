@@ -73,7 +73,7 @@
                     </details>
                 </div>
             </details>
-            <a :href="serverStats" v-if="serverStats != ``">statistics</a> <b v-bind:class="serverPing <= 60 ? `success` : serverPing > 120 ? `error` : `alert`">{{ ping }}</b>
+            <a :href="cdn" v-if="cdn != ``">robust-cdn</a> <a :href="serverStats" v-if="serverStats != ``">statistics</a> <b v-bind:class="serverPing <= 60 ? `success` : serverPing > 120 ? `error` : `alert`">{{ ping }}</b>
         </div>
         <span v-else-if="serverError != ''" class="error">{{ serverError }}</span>
 
@@ -92,7 +92,7 @@ export default {
     mounted() {
         this.request_server()
         this.get_ping()
-        setTimeout(() => this.search_stats(), 1000)
+        setTimeout(() => this.search_stats(), 2000)
     },
     data() {
         return {
@@ -117,6 +117,10 @@ export default {
         },
         ping() {
             return `${this.serverPing}ms (because of free proxy)`
+        },
+        cdn() {
+            
+            return !this.serverInfo.build.acz ? this.serverInfo.build.download_url.split(`/version`)[0] : ``
         },
         url() {
             // CORS proxy & HTTP to HTTPS proxy
